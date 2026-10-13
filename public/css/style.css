@@ -61,7 +61,9 @@ h2 { font-size: 1.1rem; margin: 0 0 1rem; }
   z-index: 10;
 }
 
-.topbar-brand { color: var(--text); font-weight: 800; font-size: 1.05rem; white-space: nowrap; }
+.topbar-brand { color: var(--text); font-weight: 800; font-size: 1.05rem; white-space: nowrap; display: inline-flex; align-items: center; gap: 0.5rem; text-decoration: none; }
+.topbar-brand strong, .auth-brand-name strong { color: var(--primary); }
+.brand-logo { width: 34px; height: 34px; object-fit: contain; }
 .topbar-brand-mark { color: var(--accent); margin-right: 0.35rem; }
 .topbar-nav { display: flex; gap: 0.25rem; flex: 1; }
 .topbar-nav a { text-decoration: none; color: var(--muted); font-weight: 600; padding: 0.45rem 0.7rem; border-radius: 7px; }
@@ -214,6 +216,14 @@ h2 { font-size: 1.1rem; margin: 0 0 1rem; }
   gap: 1rem;
 }
 .login-card h1 { margin: 0; font-size: 1.3rem; }
+.auth-brand { display: flex; flex-direction: column; align-items: center; gap: 0.45rem; margin-bottom: 0.5rem; }
+.auth-logo { width: 106px; height: 106px; object-fit: contain; }
+.auth-brand-name { font-size: 1.15rem; font-weight: 800; color: var(--text); letter-spacing: -0.02em; }
+.auth-footer { text-align: center; margin: 0; }
+.register-card { width: min(100%, 460px); }
+.dashboard-title { display: flex; align-items: center; gap: 0.9rem; }
+.dashboard-logo { width: 58px; height: 58px; object-fit: contain; }
+.dashboard-heading h1 { margin-bottom: 0.35rem; }
 
 /* POS screen */
 .pos-layout {
@@ -341,6 +351,7 @@ h2 { font-size: 1.1rem; margin: 0 0 1rem; }
   .topbar-nav a { white-space: nowrap; font-size: 0.85rem; }
   .topbar-user { margin-left: auto; }
   .topbar-user > span:first-child { display: none; }
+  .dashboard-logo { width: 48px; height: 48px; }
   .container { padding: 1.35rem 1rem; }
   .stat-row { grid-template-columns: 1fr; }
   .form-grid { grid-template-columns: 1fr; }

@@ -1,5 +1,8 @@
 <header class="topbar">
-  <div class="topbar-brand"><span class="topbar-brand-mark">●</span> Sari-Sari POS</div>
+  <a href="/" class="topbar-brand">
+    <img src="/images/logo.png" alt="" class="brand-logo" />
+    <span>Sari-Sari <strong>POS</strong></span>
+  </a>
   <nav class="topbar-nav" aria-label="Main navigation">
     <% if (currentUser && currentUser.role === 'admin') { %>
       <a href="/admin/dashboard">Dashboard</a>

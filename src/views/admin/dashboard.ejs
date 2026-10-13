@@ -1,7 +1,12 @@
 <%- include('../partials/head') %>
 <%- include('../partials/nav') %>
 <main class="container">
-  <div class="page-heading"><div><h1>Dashboard</h1><p class="muted">Here’s how your store is doing today.</p></div></div>
+  <div class="page-heading dashboard-heading">
+    <div class="dashboard-title">
+      <img src="/images/logo.png" alt="" class="dashboard-logo" />
+      <div><h1>Dashboard</h1><p class="muted">Here’s how your store is doing today.</p></div>
+    </div>
+  </div>
   <div class="quick-actions">
     <a href="/admin/products" class="btn btn-primary">+ Add product</a>
     <a href="/admin/sales" class="btn btn-secondary">View sales</a>
