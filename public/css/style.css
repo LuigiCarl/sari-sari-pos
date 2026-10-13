@@ -254,3 +254,11 @@ a { color: var(--primary); }
   font-size: 0.8rem;
   padding: 1.5rem 1rem;
 }
+
+.login-logo {
+  display: block;
+  width: 100px;
+  height: 100px;
+  object-fit: contain;
+  margin: 0 auto 12px;
+}
