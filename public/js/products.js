@@ -31,14 +31,17 @@
   function filter() {
     const search = document.getElementById('catalogSearch').value.trim().toLowerCase();
     const category = document.getElementById('catalogCategory').value;
+    const status = document.getElementById('catalogStatus').value;
     let visible = 0;
     document.querySelectorAll('#productsTable tbody tr').forEach(row => {
-      row.hidden = !row.dataset.search.toLowerCase().includes(search) || Boolean(category && row.dataset.category !== category);
+      const matchesStatus = !status || (status === 'inactive' ? row.dataset.active === 'false' : row.dataset.active === 'true' && (status === 'out' ? Number(row.dataset.stock) <= 0 : Number(row.dataset.stock) > 0 && Number(row.dataset.stock) <= Number(row.dataset.reorder)));
+      row.hidden = !row.dataset.search.toLowerCase().includes(search) || Boolean(category && row.dataset.category !== category) || !matchesStatus;
       if (!row.hidden) visible++;
     });
     document.getElementById('catalogEmpty').hidden = visible > 0;
   }
   document.getElementById('catalogSearch').addEventListener('input', filter);
   document.getElementById('catalogCategory').addEventListener('change', filter);
+  document.getElementById('catalogStatus').addEventListener('change', filter);
   if (location.hash === '#add') openProduct();
 })();

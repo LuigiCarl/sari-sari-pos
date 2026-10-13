@@ -1,28 +1,33 @@
 const bcrypt = require('bcryptjs');
-const { query } = require('../config/db');
+const { query, getClient } = require('../config/db');
+const { randomUUID } = require('node:crypto');
+const { saleHistory } = require('../utils/saleHistory');
 const { setFlash } = require('../middleware/flash');
+const { productValues } = require('../utils/productValidation');
 
 async function dashboard(req, res, next) {
   try {
     const [todayTotal, weekTotal, monthTotal, topProducts, lowStock, recentSales] = await Promise.all([
       query(
-        `SELECT COALESCE(SUM(total_amount), 0) AS total, COUNT(*) AS count
-         FROM sales WHERE created_at::date = CURRENT_DATE`
+        `SELECT COALESCE(SUM(net_amount), 0) AS total, COUNT(*) FILTER (WHERE voided_at IS NULL) AS count
+         FROM sales_net WHERE (created_at AT TIME ZONE 'Asia/Manila')::date = (NOW() AT TIME ZONE 'Asia/Manila')::date`
       ).then((r) => r.rows[0]),
       query(
-        `SELECT COALESCE(SUM(total_amount), 0) AS total, COUNT(*) AS count
-         FROM sales WHERE created_at >= NOW() - INTERVAL '6 days'`
+        `SELECT COALESCE(SUM(net_amount), 0) AS total, COUNT(*) FILTER (WHERE voided_at IS NULL) AS count
+         FROM sales_net WHERE created_at >= (((NOW() AT TIME ZONE 'Asia/Manila')::date - 6)::timestamp AT TIME ZONE 'Asia/Manila')`
       ).then((r) => r.rows[0]),
       query(
-        `SELECT COALESCE(SUM(total_amount), 0) AS total, COUNT(*) AS count
-         FROM sales WHERE to_char(created_at, 'YYYY-MM') = to_char(NOW(), 'YYYY-MM')`
+        `SELECT COALESCE(SUM(net_amount), 0) AS total, COUNT(*) FILTER (WHERE voided_at IS NULL) AS count
+         FROM sales_net WHERE created_at >= (date_trunc('month', NOW() AT TIME ZONE 'Asia/Manila') AT TIME ZONE 'Asia/Manila')`
       ).then((r) => r.rows[0]),
       query(
-        `SELECT sale_items.product_name, SUM(sale_items.quantity) AS units_sold, SUM(sale_items.subtotal) AS revenue
+        `SELECT sale_items.product_name, SUM(sale_items.quantity - COALESCE(refunded.quantity, 0)) AS units_sold, SUM((sale_items.quantity - COALESCE(refunded.quantity, 0)) * sale_items.unit_price) AS revenue
          FROM sale_items
          JOIN sales ON sales.id = sale_items.sale_id
-         WHERE sales.created_at >= NOW() - INTERVAL '29 days'
+         LEFT JOIN (SELECT sale_item_id, SUM(quantity) AS quantity FROM sale_refund_items GROUP BY sale_item_id) refunded ON refunded.sale_item_id = sale_items.id
+         WHERE sales.voided_at IS NULL AND sales.created_at >= (((NOW() AT TIME ZONE 'Asia/Manila')::date - 29)::timestamp AT TIME ZONE 'Asia/Manila')
          GROUP BY sale_items.product_id, sale_items.product_name
+         HAVING SUM(sale_items.quantity - COALESCE(refunded.quantity, 0)) > 0
          ORDER BY revenue DESC
          LIMIT 5`
       ).then((r) => r.rows),
@@ -75,16 +80,7 @@ async function createProduct(req, res, next) {
     await query(
       `INSERT INTO products (name, barcode, category_id, unit, cost_price, selling_price, stock_quantity, reorder_level)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-      [
-        name,
-        barcode || null,
-        category_id || null,
-        unit || 'pc',
-        Number(cost_price) || 0,
-        Number(selling_price) || 0,
-        Number(stock_quantity) || 0,
-        Number(reorder_level) || 5,
-      ]
+      productValues(req.body)
     );
     setFlash(req, 'success', `Product "${name}" added.`);
     res.redirect('/admin/products');
@@ -97,29 +93,32 @@ async function createProduct(req, res, next) {
 async function updateProduct(req, res, next) {
   const { id } = req.params;
   const { name, barcode, category_id, unit, cost_price, selling_price, stock_quantity, reorder_level, active } = req.body;
+  let client;
   try {
-    await query(
+    const values = productValues(req.body);
+    client = await getClient();
+    await client.query('BEGIN');
+    const { rows } = await client.query('SELECT stock_quantity FROM products WHERE id = $1 FOR UPDATE', [id]);
+    if (!rows[0]) throw new Error('Product not found.');
+    const difference = values[6] - rows[0].stock_quantity;
+    const reason = String(req.body.stock_reason || '').trim();
+    if (difference && !reason) throw new Error('A reason is required when changing stock.');
+    await client.query(
       `UPDATE products SET name = $1, barcode = $2, category_id = $3, unit = $4, cost_price = $5, selling_price = $6,
        stock_quantity = $7, reorder_level = $8, active = $9, updated_at = NOW()
        WHERE id = $10`,
-      [
-        name,
-        barcode || null,
-        category_id || null,
-        unit || 'pc',
-        Number(cost_price) || 0,
-        Number(selling_price) || 0,
-        Number(stock_quantity) || 0,
-        Number(reorder_level) || 5,
-        Boolean(active),
-        id,
-      ]
+      [...values, active === '1', id]
     );
+    if (difference) await client.query('INSERT INTO inventory_reports (user_id, product_id, type, quantity_change, note, previous_stock, new_stock) VALUES ($1,$2,$3,$4,$5,$6,$7)', [req.session.user.id, id, 'correction', difference, 'Admin edit: ' + reason, rows[0].stock_quantity, values[6]]);
+    await client.query('COMMIT');
     setFlash(req, 'success', `Product "${name}" updated.`);
     res.redirect('/admin/products');
   } catch (err) {
+    if (client) await client.query('ROLLBACK');
     setFlash(req, 'error', `Could not update product: ${err.message}`);
     res.redirect('/admin/products');
+  } finally {
+    if (client) client.release();
   }
 }
 
@@ -216,7 +215,8 @@ async function viewSale(req, res, next) {
     const sale = rows[0];
     if (!sale) return res.status(404).render('error', { title: 'Not Found', message: 'Sale not found.' });
     const { rows: items } = await query('SELECT * FROM sale_items WHERE sale_id = $1', [sale.id]);
-    res.render('admin/sale_detail', { title: 'Sale Detail', sale, items });
+    const history = await saleHistory(sale.id);
+    res.render('admin/sale_detail', { title: 'Sale Detail', sale, items, history, returnToken: randomUUID() });
   } catch (err) {
     next(err);
   }
@@ -254,8 +254,8 @@ async function salesChartData(req, res, next) {
        ), dates AS (
          SELECT generate_series(start_day::timestamp, today::timestamp, INTERVAL '1 day') AS day FROM bounds
        )
-       SELECT to_char(dates.day, 'YYYY-MM-DD') AS day, COALESCE(SUM(sales.total_amount), 0) AS total
-       FROM dates LEFT JOIN sales
+       SELECT to_char(dates.day, 'YYYY-MM-DD') AS day, COALESCE(SUM(sales.net_amount), 0) AS total
+       FROM dates LEFT JOIN sales_net sales
          ON sales.created_at >= dates.day AT TIME ZONE 'Asia/Manila'
         AND sales.created_at < (dates.day + INTERVAL '1 day') AT TIME ZONE 'Asia/Manila'
        GROUP BY dates.day ORDER BY dates.day`,

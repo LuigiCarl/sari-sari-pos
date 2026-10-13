@@ -33,18 +33,23 @@
 
   <div class="pos-cart">
     <div class="cart-heading"><h2>Cart</h2><span class="cart-count" id="cartCount">0 items</span></div>
+    <button type="button" class="btn btn-small btn-secondary" id="clearCart" disabled>Clear Cart</button>
     <table class="table" id="cartTable">
       <thead><tr><th>Item</th><th>Price</th><th>Qty</th><th>Subtotal</th><th></th></tr></thead>
       <tbody id="cartBody"></tbody>
     </table>
+    <p class="muted" id="cartEmpty">Your cart is empty. Select a product to begin.</p>
     <div class="cart-total">Total: <span id="cartTotal">₱0.00</span></div>
 
-    <form method="POST" action="/pos/checkout" id="checkoutForm">
+    <form method="POST" action="/pos/checkout" id="checkoutForm" data-user-id="<%= currentUser.id %>">
       <input type="hidden" name="items" id="itemsInput" />
+      <input type="hidden" name="checkout_token" value="<%= checkoutToken %>" />
+      <p class="data-status" id="cartRecoveryStatus" role="status"></p>
       <label>Amount Paid
         <input type="number" step="0.01" min="0" name="amount_paid" id="amountPaid" required />
       </label>
       <div class="cart-change">Change: <span id="changeAmount">₱0.00</span></div>
+      <p id="paymentStatus" class="data-status payment-status" role="status" aria-live="polite"></p>
       <button type="submit" class="btn btn-primary btn-block" id="checkoutBtn" disabled>Complete Sale</button>
     </form>
   </div>

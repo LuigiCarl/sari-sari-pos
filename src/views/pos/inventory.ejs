@@ -22,14 +22,16 @@
         </select>
       </label>
       <label>Quantity <input type="number" name="quantity" min="1" required /></label>
+      <label>Correction direction<select name="direction"><option value="decrease">Decrease stock (correction only)</option><option value="increase">Increase stock (correction only)</option></select></label>
       <label>Note <input type="text" name="note" placeholder="Optional remarks" /></label>
-      <button type="submit" class="btn btn-primary">Submit Report</button>
+      <button type="submit" class="btn btn-primary" <%= products.length ? '' : 'disabled' %>>Submit Report</button>
     </form>
+    <% if (!products.length) { %><p class="muted">No products available. Ask your administrator to add products before submitting a report.</p><% } %>
   </div>
 
   <div class="card">
     <div class="section-heading"><h2>Current Stock</h2><input type="search" class="table-search" data-filter-table="stockTable" placeholder="Search stock..." /></div>
-    <table class="table" id="stockTable">
+    <div class="table-scroll"><table class="table" id="stockTable">
       <thead><tr><th>Product</th><th>Stock</th><th>Reorder Level</th></tr></thead>
       <tbody>
         <% products.forEach(p => { %>
@@ -40,7 +42,8 @@
           </tr>
         <% }) %>
       </tbody>
-    </table>
+    </table></div>
+    <% if (!products.length) { %><p class="muted">No stock to display yet.</p><% } %>
   </div>
 
   <div class="card">
@@ -48,20 +51,21 @@
     <% if (myReports.length === 0) { %>
       <p class="muted">You haven't submitted any reports yet.</p>
     <% } else { %>
-      <table class="table">
-        <thead><tr><th>Product</th><th>Type</th><th>Change</th><th>Note</th><th>When</th></tr></thead>
+      <div class="table-scroll"><table class="table">
+        <thead><tr><th>Product</th><th>Type</th><th>Change</th><th>Stock Before → After</th><th>Note</th><th>When</th></tr></thead>
         <tbody>
           <% myReports.forEach(r => { %>
             <tr>
               <td><%= r.product_name %></td>
               <td><%= r.type %></td>
               <td><%= r.quantity_change > 0 ? '+' : '' %><%= r.quantity_change %></td>
+              <td><%= r.previous_stock == null ? 'Not recorded' : r.previous_stock + ' → ' + r.new_stock %></td>
               <td><%= r.note || '—' %></td>
-              <td><%= r.created_at %></td>
+              <td><%= new Date(r.created_at).toLocaleString('en-PH', { timeZone: 'Asia/Manila', month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' }) %></td>
             </tr>
           <% }) %>
         </tbody>
-      </table>
+      </table></div>
     <% } %>
   </div>
 </main>

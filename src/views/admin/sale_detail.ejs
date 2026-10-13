@@ -4,6 +4,7 @@
   <h1>Sale Details</h1>
   <p class="muted sale-receipt-number">Receipt <%= sale.receipt_no %></p>
   <div class="card">
+    <%- include('../partials/sale_status') %>
     <p><strong>Cashier:</strong> <%= sale.cashier %></p>
     <p><strong>Date:</strong> <%= new Date(sale.created_at).toLocaleString('en-PH', { timeZone: 'Asia/Manila', month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' }) %></p>
     <div class="table-scroll" tabindex="0" role="region" aria-label="Sale items">
@@ -28,5 +29,23 @@
     </dl>
     <div class="sale-detail-actions"><a href="/admin/sales" class="btn btn-secondary">Back to Sales</a></div>
   </div>
+  <% if (!sale.voided_at) { %>
+  <div class="card">
+    <h2>Refund items</h2><p class="muted">Select quantities to refund. Restore stock only for returned items that can be sold again.</p>
+    <form method="POST" action="/admin/sales/<%= sale.id %>/return" class="return-form">
+      <input type="hidden" name="mode" value="refund" /><input type="hidden" name="request_token" value="<%= returnToken %>" />
+      <% items.forEach(item => { const already = history.refundedItems.find(r => r.sale_item_id === item.id); const remaining = item.quantity - (already ? already.refunded_quantity : 0); %>
+      <div class="return-item"><label><%= item.product_name %> (<%= remaining %> refundable)<input type="number" name="qty_<%= item.id %>" min="0" max="<%= remaining %>" value="0" /></label><label><input type="checkbox" name="restock_<%= item.id %>" value="1" />Returned and sellable</label></div>
+      <% }) %>
+      <label>Refund reason<input name="reason" required /></label><button type="submit" class="btn btn-primary">Confirm Refund</button>
+    </form>
+  </div>
+  <% if (!history.refunds.length) { %><div class="card"><h2>Void sale</h2><p class="muted">Cancel this entire sale. Original receipt amounts remain in the record.</p>
+    <form method="POST" action="/admin/sales/<%= sale.id %>/return" class="return-form" onsubmit="return confirm('Void this entire sale?')">
+      <input type="hidden" name="mode" value="void" /><input type="hidden" name="request_token" value="<%= returnToken %>" />
+      <label>Void reason<input name="reason" required /></label><label><input type="checkbox" name="restore_stock" value="1" />All items are returned and sellable; restore stock</label><button type="submit" class="btn btn-danger">Void Sale</button>
+    </form></div><% } %>
+  <% } %>
+  <% history.refunds.forEach(refund => { %><p><a href="/admin/refunds/<%= refund.id %>">View refund receipt #<%= refund.id %></a></p><% }) %>
 </main>
 <%- include('../partials/foot') %>

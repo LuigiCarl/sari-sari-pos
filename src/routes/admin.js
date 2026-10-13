@@ -1,6 +1,7 @@
 const express = require('express');
 const { requireRole } = require('../middleware/auth');
 const ctrl = require('../controllers/adminController');
+const returns = require('../controllers/returnsController');
 
 const router = express.Router();
 router.use(requireRole('admin'));
@@ -19,6 +20,8 @@ router.post('/users/:id/toggle-active', ctrl.toggleUserActive);
 
 router.get('/sales', ctrl.listSales);
 router.get('/sales/:id', ctrl.viewSale);
+router.post('/sales/:id/return', returns.processReturn);
+router.get('/refunds/:id', returns.refundReceipt);
 
 router.get('/inventory-reports', ctrl.listInventoryReports);
 

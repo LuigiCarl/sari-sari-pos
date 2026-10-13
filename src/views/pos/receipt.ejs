@@ -3,6 +3,7 @@
 <main class="container receipt-page">
   <div class="card receipt">
     <div class="receipt-brand"><strong>Sari-Sari POS</strong><h1>Sales Receipt</h1></div>
+    <%- include('../partials/sale_status') %>
     <p><strong>Receipt No:</strong> <%= sale.receipt_no %></p>
     <p><strong>Date:</strong> <%= new Date(sale.created_at).toLocaleString('en-PH', { timeZone: 'Asia/Manila', month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' }) %></p>
     <table class="table">
@@ -31,4 +32,11 @@
     </div>
   </div>
 </main>
+<script>
+  try {
+    const key = 'pos-draft-<%= currentUser.id %>';
+    const draft = JSON.parse(sessionStorage.getItem(key) || 'null');
+    if (draft && draft.token === '<%= sale.checkout_token || '' %>') sessionStorage.removeItem(key);
+  } catch (_) {}
+</script>
 <%- include('../partials/foot') %>

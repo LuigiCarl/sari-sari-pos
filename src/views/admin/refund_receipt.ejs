@@ -1,0 +1,10 @@
+<%- include('../partials/head') %>
+<%- include('../partials/nav') %>
+<main class="container receipt-page"><div class="card receipt">
+  <div class="receipt-brand"><strong>Sari-Sari POS</strong><h1>Refund Receipt #<%= refund.id %></h1></div>
+  <p>Original receipt: <%= refund.receipt_no %></p><p>Reason: <%= refund.reason %></p><p>Approved by: <%= refund.approved_by %></p><p><%= new Date(refund.created_at).toLocaleString('en-PH', { timeZone: 'Asia/Manila' }) %></p>
+  <table class="table"><thead><tr><th>Item</th><th>Qty</th><th>Restocked</th><th>Refund</th></tr></thead><tbody><% items.forEach(item => { %><tr><td><%= item.product_name %></td><td><%= item.quantity %></td><td><%= item.restocked ? 'Yes' : 'No' %></td><td><%= peso(item.amount) %></td></tr><% }) %></tbody></table>
+  <p><strong>Total refunded: <%= peso(refund.amount) %></strong></p>
+  <div class="receipt-actions"><button type="button" onclick="window.print()" class="btn btn-secondary">Print</button><a href="/admin/sales/<%= refund.sale_id %>" class="btn btn-primary">Back to Sale</a></div>
+</div></main>
+<%- include('../partials/foot') %>

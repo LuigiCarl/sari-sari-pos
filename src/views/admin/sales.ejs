@@ -17,21 +17,22 @@
     <% if (sales.length === 0) { %>
       <p class="muted">No transactions found.</p>
     <% } else { %>
-      <table class="table" id="salesTable">
-        <thead><tr><th>Receipt</th><th>Cashier</th><th>Total</th><th>Paid</th><th>Change</th><th>When</th></tr></thead>
+      <div class="table-scroll"><table class="table" id="salesTable">
+        <thead><tr><th>Receipt</th><th>Cashier</th><th>Original sale</th><th>Refunded</th><th>Net sale</th><th>Status</th><th>When</th></tr></thead>
         <tbody>
           <% sales.forEach(s => { %>
             <tr>
               <td><a href="/admin/sales/<%= s.id %>"><%= s.receipt_no %></a></td>
               <td><%= s.cashier %></td>
               <td><%= peso(s.total_amount) %></td>
-              <td><%= peso(s.amount_paid) %></td>
-              <td><%= peso(s.change_amount) %></td>
-              <td><%= s.created_at %></td>
+              <td><%= peso(s.refunded_amount) %></td>
+              <td><%= peso(s.net_amount) %></td>
+              <td><%= s.voided_at ? 'Voided' : Number(s.refunded_amount) > 0 ? 'Refunded' : 'Completed' %></td>
+              <td><%= new Date(s.created_at).toLocaleString('en-PH', { timeZone: 'Asia/Manila' }) %></td>
             </tr>
           <% }) %>
         </tbody>
-      </table>
+      </table></div>
     <% } %>
   </div>
 </main>

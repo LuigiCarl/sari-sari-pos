@@ -2,7 +2,7 @@
 <%- include('../partials/nav') %>
 <main class="container inventory-reports-page">
   <h1>Inventory Reports</h1>
-  <p class="muted">Stock adjustments submitted by sales representatives (restocks, damaged/lost items, corrections).</p>
+  <p class="muted">Stock adjustments, admin edits, and stock restored by voids or refunds.</p>
 
   <div class="card">
     <div class="section-heading reports-toolbar">
@@ -14,13 +14,14 @@
     <% } else { %>
       <div class="table-scroll" tabindex="0" role="region" aria-label="Inventory adjustments">
       <table class="table" id="reportsTable">
-        <thead><tr><th>Product</th><th>Type</th><th>Change</th><th>Note</th><th>Reported By</th><th>When</th></tr></thead>
+        <thead><tr><th>Product</th><th>Type</th><th>Change</th><th>Stock Before → After</th><th>Note</th><th>Reported By</th><th>When</th></tr></thead>
         <tbody>
           <% reports.forEach(r => { %>
             <tr>
               <td><%= r.product_name %></td>
               <td><span class="stock-badge <%= r.quantity_change < 0 ? 'stock-low' : 'stock-good' %>"><%= r.type.replace(/_/g, ' ') %></span></td>
               <td class="quantity-change <%= r.quantity_change < 0 ? 'text-danger' : '' %>"><%= r.quantity_change > 0 ? '+' : '' %><%= r.quantity_change %></td>
+              <td><%= r.previous_stock == null ? 'Not recorded' : r.previous_stock + ' → ' + r.new_stock %></td>
               <td><%= r.note || '—' %></td>
               <td><%= r.reported_by %></td>
               <td class="report-date"><span><%= new Date(r.created_at).toLocaleDateString('en-PH', { timeZone: 'Asia/Manila', month: 'short', day: 'numeric', year: 'numeric' }) %></span><small class="muted"><%= new Date(r.created_at).toLocaleTimeString('en-PH', { timeZone: 'Asia/Manila', hour: '2-digit', minute: '2-digit' }) %></small></td>

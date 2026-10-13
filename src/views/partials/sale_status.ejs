@@ -1,0 +1,9 @@
+<% const totalQuantity = items.reduce((sum, item) => sum + item.quantity, 0); const refundedQuantity = history.refundedItems.reduce((sum, item) => sum + item.refunded_quantity, 0); %>
+<% if (sale.voided_at) { %>
+  <div class="sale-status"><strong class="text-danger">VOIDED</strong><p>Reason: <%= sale.void_reason %></p><p><%= new Date(sale.voided_at).toLocaleString('en-PH', { timeZone: 'Asia/Manila' }) %> · Approved by <%= history.voidApprover %></p><p>Original amounts below are preserved. This sale is excluded from net sales.</p></div>
+<% } else if (history.refunds.length) { %>
+  <div class="sale-status"><strong><%= refundedQuantity >= totalQuantity ? 'FULLY REFUNDED' : 'PARTIALLY REFUNDED' %></strong><p>Refunded: <%= peso(history.refundedTotal) %> · Net sale: <%= peso(Number(sale.total_amount) - history.refundedTotal) %></p>
+    <% history.refunds.forEach(refund => { %><p>Refund #<%= refund.id %> · <%= peso(refund.amount) %> · <%= refund.reason %> · Approved by <%= refund.approved_by %> · <%= new Date(refund.created_at).toLocaleString('en-PH', { timeZone: 'Asia/Manila' }) %></p><% }) %>
+    <% history.refundLines.forEach(line => { %><p><%= line.product_name %> × <%= line.quantity %> · <%= peso(line.amount) %> · <%= line.restocked ? 'Restocked' : 'Stock not restored' %></p><% }) %>
+  </div>
+<% } %>

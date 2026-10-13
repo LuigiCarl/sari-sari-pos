@@ -13,17 +13,17 @@
 
   <div class="stat-row">
     <div class="stat-card">
-      <div class="stat-label">Today’s sales</div>
+      <div class="stat-label">Today’s net sales</div>
       <div class="stat-value"><%= peso(todayTotal.total) %></div>
       <div class="stat-sub"><%= todayTotal.count %> transaction<%= todayTotal.count === 1 ? '' : 's' %></div>
     </div>
     <div class="stat-card">
-      <div class="stat-label">Last 7 days</div>
+      <div class="stat-label">Last 7 days · net sales</div>
       <div class="stat-value"><%= peso(weekTotal.total) %></div>
       <div class="stat-sub"><%= weekTotal.count %> transaction<%= weekTotal.count === 1 ? '' : 's' %></div>
     </div>
     <div class="stat-card">
-      <div class="stat-label">This month</div>
+      <div class="stat-label">This month · net sales</div>
       <div class="stat-value"><%= peso(monthTotal.total) %></div>
       <div class="stat-sub"><%= monthTotal.count %> transaction<%= monthTotal.count === 1 ? '' : 's' %></div>
     </div>
@@ -33,7 +33,7 @@
     <div class="card">
       <div class="section-heading">
         <div>
-          <h2>Sales Trend <span class="muted" id="salesRangeLabel">(Last 7 days)</span></h2>
+          <h2>Net Sales Trend <span class="muted" id="salesRangeLabel">(Last 7 days)</span></h2>
           <p class="data-status" id="salesChartStatus">Loading live data…</p>
         </div>
         <button type="button" class="btn btn-small btn-secondary" id="refreshSalesChart">Refresh</button>
