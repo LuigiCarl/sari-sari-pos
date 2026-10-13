@@ -1,79 +1,40 @@
-<%- include('../partials/head') %>
+﻿<%- include('../partials/head') %>
 <%- include('../partials/nav') %>
-<main class="container">
-  <h1>Products</h1>
-
-  <div class="grid-2">
-    <div class="card">
-      <h2>Add Product</h2>
-      <form method="POST" action="/admin/products" class="form-grid">
-        <label>Name <input type="text" name="name" required /></label>
-        <label>Barcode <input type="text" name="barcode" /></label>
-        <label>Category
-          <select name="category_id">
-            <option value="">—</option>
-            <% categories.forEach(c => { %><option value="<%= c.id %>"><%= c.name %></option><% }) %>
-          </select>
-        </label>
-        <label>Unit <input type="text" name="unit" value="pc" /></label>
-        <label>Cost Price <input type="number" step="0.01" name="cost_price" value="0" /></label>
-        <label>Selling Price <input type="number" step="0.01" name="selling_price" required /></label>
-        <label>Stock Quantity <input type="number" name="stock_quantity" value="0" /></label>
-        <label>Reorder Level <input type="number" name="reorder_level" value="5" /></label>
-        <button type="submit" class="btn btn-primary">Add Product</button>
-      </form>
-    </div>
-
-    <div class="card">
-      <h2>Add Category</h2>
-      <form method="POST" action="/admin/categories" class="form-inline">
-        <input type="text" name="name" placeholder="Category name" required />
-        <button type="submit" class="btn btn-secondary">Add</button>
-      </form>
-      <h2 style="margin-top: 1.5rem;">Existing Categories</h2>
-      <ul class="plain-list">
-        <% categories.forEach(c => { %><li><%= c.name %></li><% }) %>
-      </ul>
-    </div>
-  </div>
-
+<main class="container products-page">
+  <div class="page-heading"><div><p class="eyebrow">Store catalog</p><h1>Products</h1><p class="muted">Manage your catalog, prices, and stock levels.</p></div><div class="quick-actions"><button class="btn btn-secondary" data-open-dialog="categoryDrawer">Categories</button><button class="btn btn-primary" data-add-product>+ Add Product</button></div></div>
   <div class="card">
-    <h2>All Products</h2>
-    <div class="table-scroll">
-      <table class="table">
-        <thead>
-          <tr>
-            <th>Name</th><th>Category</th><th>Unit</th><th>Cost</th><th>Price</th><th>Stock</th><th>Reorder</th><th>Active</th><th></th>
-          </tr>
-        </thead>
-        <tbody>
-          <% products.forEach(p => { %>
-            <% const fid = 'product-form-' + p.id %>
-            <tr class="<%= !p.active ? 'row-muted' : (p.stock_quantity <= p.reorder_level ? 'row-warning' : '') %>">
-                <td><input form="<%= fid %>" type="text" name="name" value="<%= p.name %>" required /></td>
-                <td>
-                  <select form="<%= fid %>" name="category_id">
-                    <option value="">—</option>
-                    <% categories.forEach(c => { %>
-                      <option value="<%= c.id %>" <%= c.id === p.category_id ? 'selected' : '' %>><%= c.name %></option>
-                    <% }) %>
-                  </select>
-                </td>
-                <td><input form="<%= fid %>" type="text" name="unit" value="<%= p.unit %>" size="4" /></td>
-                <td><input form="<%= fid %>" type="number" step="0.01" name="cost_price" value="<%= p.cost_price %>" size="6" /></td>
-                <td><input form="<%= fid %>" type="number" step="0.01" name="selling_price" value="<%= p.selling_price %>" size="6" /></td>
-                <td><input form="<%= fid %>" type="number" name="stock_quantity" value="<%= p.stock_quantity %>" size="4" /></td>
-                <td><input form="<%= fid %>" type="number" name="reorder_level" value="<%= p.reorder_level %>" size="4" /></td>
-                <td><input form="<%= fid %>" type="checkbox" name="active" value="1" <%= p.active ? 'checked' : '' %> /></td>
-                <td>
-                  <form id="<%= fid %>" method="POST" action="/admin/products/<%= p.id %>"></form>
-                  <button form="<%= fid %>" type="submit" class="btn btn-small">Save</button>
-                </td>
-            </tr>
-          <% }) %>
-        </tbody>
-      </table>
+    <div class="catalog-toolbar"><h2>All Products <span class="cart-count"><%= products.length %></span></h2><input type="search" id="catalogSearch" placeholder="Search name or barcode..." aria-label="Search products" /><select id="catalogCategory" aria-label="Filter by category"><option value="">All categories</option><% categories.forEach(c => { %><option value="<%= c.id %>"><%= c.name %></option><% }) %></select></div>
+    <div class="table-scroll" tabindex="0" role="region" aria-label="Product catalog">
+      <table class="table catalog-table" id="productsTable"><thead><tr><th>Product</th><th>Category</th><th>Price</th><th>Stock</th><th>Status</th><th>Action</th></tr></thead><tbody>
+      <% products.forEach(p => { %>
+        <tr data-search="<%= p.name %> <%= p.barcode || '' %>" data-category="<%= p.category_id || '' %>">
+          <td><strong><%= p.name %></strong><small class="catalog-unit muted"><%= p.unit %><% if (p.barcode) { %> &middot; <%= p.barcode %><% } %></small></td>
+          <td><%= p.category_name || 'Uncategorized' %></td><td class="catalog-price"><%= peso(p.selling_price) %></td>
+          <td><span class="stock-badge <%= p.stock_quantity <= 0 ? 'stock-out' : p.stock_quantity <= p.reorder_level ? 'stock-low' : 'stock-good' %>"><%= p.stock_quantity %> <%= p.unit %> &middot; <%= p.stock_quantity <= 0 ? 'Out of stock' : p.stock_quantity <= p.reorder_level ? 'Low stock' : 'In stock' %></span></td>
+          <td><span class="muted"><%= p.active ? 'Active' : 'Inactive' %></span></td>
+          <td><button type="button" class="btn btn-small btn-secondary" data-edit-product="<%= JSON.stringify(p) %>" aria-label="Edit <%= p.name %>">Edit</button></td>
+        </tr>
+      <% }) %>
+      </tbody></table>
+      <p class="catalog-empty muted" id="catalogEmpty" <%= products.length ? 'hidden' : '' %>>No products found. Add a product or adjust your filters.</p>
     </div>
   </div>
 </main>
+<dialog class="drawer" id="productDrawer" aria-labelledby="productDrawerTitle">
+  <div class="drawer-heading"><div><p class="eyebrow">Store catalog</p><h2 id="productDrawerTitle">Add Product</h2></div><button type="button" class="btn btn-secondary" data-close-dialog aria-label="Close product form">&#10005;</button></div>
+  <form method="POST" action="/admin/products" id="productEditor" class="form-grid">
+    <label class="form-wide">Product name<input name="name" required /></label>
+    <label>Barcode<input name="barcode" /></label><label>Category<select name="category_id"><option value="">Uncategorized</option><% categories.forEach(c => { %><option value="<%= c.id %>"><%= c.name %></option><% }) %></select></label>
+    <label>Unit<input name="unit" value="pc" required /></label><label>Selling price<input type="number" step="0.01" name="selling_price" required /></label>
+    <label>Cost price<input type="number" step="0.01" name="cost_price" value="0" /></label><label>Stock quantity<input type="number" name="stock_quantity" value="0" /></label>
+    <label>Reorder level<input type="number" name="reorder_level" value="5" /></label><label class="checkbox-label" id="activeProductField" hidden><input type="checkbox" name="active" value="1" checked />Active product</label>
+    <div class="drawer-actions form-wide"><button type="button" class="btn btn-secondary" data-close-dialog>Cancel</button><button type="submit" class="btn btn-primary" id="saveProduct">Add Product</button></div>
+  </form>
+</dialog>
+<dialog class="drawer" id="categoryDrawer" aria-labelledby="categoryDrawerTitle">
+  <div class="drawer-heading"><h2 id="categoryDrawerTitle">Categories</h2><button type="button" class="btn btn-secondary" data-close-dialog aria-label="Close categories">&#10005;</button></div>
+  <form method="POST" action="/admin/categories" class="form-inline"><input name="name" placeholder="New category name" aria-label="New category name" required /><button type="submit" class="btn btn-primary">Add</button></form>
+  <h2 class="category-list-title">Existing categories</h2><ul class="plain-list"><% categories.forEach(c => { %><li><%= c.name %></li><% }) %></ul>
+</dialog>
+<script src="/js/products.js"></script>
 <%- include('../partials/foot') %>

@@ -1,9 +1,10 @@
 <header class="topbar">
+  <button type="button" class="btn btn-secondary mobile-menu" aria-expanded="false" aria-controls="mainNavigation">Menu</button>
   <a href="/" class="topbar-brand">
     <img src="/images/logo.png" alt="" class="brand-logo" />
     <span>Sari-Sari <strong>POS</strong></span>
   </a>
-  <nav class="topbar-nav" aria-label="Main navigation">
+  <nav class="topbar-nav" id="mainNavigation" aria-label="Main navigation">
     <% if (currentUser && currentUser.role === 'admin') { %>
       <a href="/admin/dashboard">Dashboard</a>
       <a href="/admin/products">Products</a>
@@ -23,7 +24,7 @@
         <button type="submit" class="link-button">Logout</button>
       </form>
     <% } %>
-    <button type="button" class="theme-toggle" data-theme-toggle aria-label="Toggle dark mode">◐</button>
+    <button type="button" class="theme-toggle" data-theme-toggle aria-label="Toggle dark mode"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M20.9 13.1A9 9 0 0 1 10.9 3.1a9 9 0 1 0 10 10Z" /></svg></button>
   </div>
 </header>
 <% if (flash && flash.success) { %><div class="alert alert-success" role="status"><%= flash.success %></div><% } %>

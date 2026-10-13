@@ -32,6 +32,7 @@
   function addToCart(tile) {
     const id = tile.dataset.id;
     const stock = Number(tile.dataset.stock);
+    if (stock <= 0) return;
     const existing = cart.get(id);
     if (existing) {
       if (existing.qty < stock) existing.qty += 1;
@@ -148,10 +149,10 @@
       productGrid.innerHTML = products
         .map(
           (p) => `
-        <button type="button" class="product-tile" data-id="${p.id}" data-name="${escapeAttr(p.name)}" data-price="${p.selling_price}" data-stock="${p.stock_quantity}" data-unit="${escapeAttr(p.unit)}" data-category="${escapeAttr(p.category_name || '')}">
+        <button type="button" class="product-tile" ${Number(p.stock_quantity) <= 0 ? 'disabled' : ''} data-id="${p.id}" data-name="${escapeAttr(p.name)}" data-price="${p.selling_price}" data-stock="${p.stock_quantity}" data-unit="${escapeAttr(p.unit)}" data-category="${escapeAttr(p.category_name || '')}">
           <span class="product-name">${escapeHtml(p.name)}</span>
           <span class="product-price">${peso(p.selling_price)}</span>
-          <span class="product-stock">${p.stock_quantity} ${escapeHtml(p.unit)} left</span>
+          <span class="product-stock stock-badge ${Number(p.stock_quantity) <= 0 ? 'stock-out' : Number(p.stock_quantity) <= Number(p.reorder_level) ? 'stock-low' : 'stock-good'}">${Number(p.stock_quantity) <= 0 ? 'Out of stock' : p.stock_quantity + ' ' + escapeHtml(p.unit) + ' left'}</span>
         </button>`
         )
         .join('');

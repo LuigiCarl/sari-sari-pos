@@ -15,6 +15,7 @@
         <button
           type="button"
           class="product-tile"
+          <%= p.stock_quantity <= 0 ? 'disabled' : '' %>
           data-id="<%= p.id %>"
           data-name="<%= p.name %>"
           data-price="<%= p.selling_price %>"
@@ -24,7 +25,7 @@
         >
           <span class="product-name"><%= p.name %></span>
           <span class="product-price"><%= peso(p.selling_price) %></span>
-          <span class="product-stock"><%= p.stock_quantity %> <%= p.unit %> left</span>
+          <span class="product-stock stock-badge <%= p.stock_quantity <= 0 ? 'stock-out' : p.stock_quantity <= p.reorder_level ? 'stock-low' : 'stock-good' %>"><%= p.stock_quantity <= 0 ? 'Out of stock' : p.stock_quantity + ' ' + p.unit + ' left' %></span>
         </button>
       <% }) %>
     </div>

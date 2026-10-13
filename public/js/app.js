@@ -1,7 +1,20 @@
 (function () {
   const root = document.documentElement;
+  const menu = document.querySelector('.mobile-menu');
+  if (menu) menu.addEventListener('click', () => {
+    const expanded = menu.getAttribute('aria-expanded') !== 'true';
+    menu.setAttribute('aria-expanded', String(expanded));
+    document.querySelector('.topbar').classList.toggle('menu-open', expanded);
+  });
   const savedTheme = localStorage.getItem('sari-theme');
   if (savedTheme === 'dark') root.dataset.theme = 'dark';
+
+  document.querySelectorAll('.topbar-nav a').forEach((link) => {
+    const path = new URL(link.href).pathname;
+    if (location.pathname === path || (path !== '/pos' && location.pathname.startsWith(path + '/'))) {
+      link.setAttribute('aria-current', 'page');
+    }
+  });
 
   const toggle = document.querySelector('[data-theme-toggle]');
   if (toggle) {

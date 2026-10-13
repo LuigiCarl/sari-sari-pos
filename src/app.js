@@ -1,3 +1,5 @@
+// Load local development variables without overriding Vercel's injected env.
+require('dotenv').config({ path: '.env.local' });
 require('dotenv').config();
 const path = require('path');
 const express = require('express');

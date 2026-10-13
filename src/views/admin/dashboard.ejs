@@ -1,14 +1,20 @@
 <%- include('../partials/head') %>
 <%- include('../partials/nav') %>
-<main class="container">
-  <div class="page-heading dashboard-heading">
+<main class="container dashboard-page">
+  <div class="dashboard-heading">
     <div class="dashboard-title">
-      <img src="/images/logo.png" alt="" class="dashboard-logo" />
-      <div><h1>Dashboard</h1><p class="muted">Here’s how your store is doing today.</p></div>
+      <div class="dashboard-logo-wrap">
+        <img src="/images/logo.png" alt="" class="dashboard-logo" />
+      </div>
+      <div class="dashboard-copy">
+        <p class="eyebrow">Store overview</p>
+        <h1>Dashboard</h1>
+        <p class="muted">Here’s how your store is doing today.</p>
+      </div>
     </div>
   </div>
   <div class="quick-actions">
-    <a href="/admin/products" class="btn btn-primary">+ Add product</a>
+    <a href="/admin/products#add" class="btn btn-primary">+ Add product</a>
     <a href="/admin/sales" class="btn btn-secondary">View sales</a>
   </div>
 
@@ -30,7 +36,7 @@
     </div>
   </div>
 
-  <div class="grid-2">
+  <div class="grid-2 dashboard-grid dashboard-overview">
     <div class="card">
       <div class="section-heading">
         <div>
@@ -39,7 +45,7 @@
         </div>
         <button type="button" class="btn btn-small btn-secondary" id="refreshSalesChart">Refresh</button>
       </div>
-      <div class="chart-wrap"><canvas id="salesTrendChart" height="220"></canvas></div>
+      <div class="chart-wrap"><canvas id="salesTrendChart" aria-label="Sales for the last seven days" role="img"></canvas></div>
     </div>
 
     <div class="card">
@@ -63,11 +69,16 @@
     </div>
   </div>
 
-  <div class="grid-2">
+  <div class="grid-2 dashboard-grid dashboard-activity">
     <div class="card">
       <h2>Low Stock Alerts</h2>
       <% if (lowStock.length === 0) { %>
-        <p class="muted">All products are sufficiently stocked.</p>
+        <div class="dashboard-empty">
+          <span class="empty-check" aria-hidden="true">&#10003;</span>
+          <strong>Stock levels look good</strong>
+          <p class="muted">All products are sufficiently stocked.</p>
+          <a href="/admin/products" class="btn btn-secondary">Manage products</a>
+        </div>
       <% } else { %>
         <table class="table">
           <thead><tr><th>Product</th><th>Stock</th><th>Reorder Level</th></tr></thead>
@@ -89,7 +100,7 @@
       <% if (recentSales.length === 0) { %>
         <p class="muted">No transactions yet.</p>
       <% } else { %>
-        <table class="table">
+        <table class="table transactions-table">
           <thead><tr><th>Receipt</th><th>Cashier</th><th>Total</th><th>When</th></tr></thead>
           <tbody>
             <% recentSales.forEach(s => { %>
@@ -97,7 +108,10 @@
                 <td><a href="/admin/sales/<%= s.id %>"><%= s.receipt_no %></a></td>
                 <td><%= s.cashier %></td>
                 <td><%= peso(s.total_amount) %></td>
-                <td><%= s.created_at %></td>
+                <td class="transaction-date">
+                  <span><%= new Date(s.created_at).toLocaleDateString('en-PH', { timeZone: 'Asia/Manila', month: 'short', day: 'numeric', year: 'numeric' }) %></span>
+                  <small class="muted"><%= new Date(s.created_at).toLocaleTimeString('en-PH', { timeZone: 'Asia/Manila', hour: '2-digit', minute: '2-digit' }) %></small>
+                </td>
               </tr>
             <% }) %>
           </tbody>
@@ -129,6 +143,8 @@
       }],
     },
     options: {
+      responsive: true,
+      maintainAspectRatio: false,
       plugins: { legend: { display: false } },
       scales: { y: { beginAtZero: true } },
     },
