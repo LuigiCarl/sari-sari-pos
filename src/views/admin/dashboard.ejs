@@ -1,21 +1,25 @@
 <%- include('../partials/head') %>
 <%- include('../partials/nav') %>
 <main class="container">
-  <h1>Dashboard</h1>
+  <div class="page-heading"><div><h1>Dashboard</h1><p class="muted">Here’s how your store is doing today.</p></div></div>
+  <div class="quick-actions">
+    <a href="/admin/products" class="btn btn-primary">+ Add product</a>
+    <a href="/admin/sales" class="btn btn-secondary">View sales</a>
+  </div>
 
   <div class="stat-row">
     <div class="stat-card">
-      <div class="stat-label">Today</div>
+      <div class="stat-label">Today’s sales</div>
       <div class="stat-value"><%= peso(todayTotal.total) %></div>
       <div class="stat-sub"><%= todayTotal.count %> transaction<%= todayTotal.count === 1 ? '' : 's' %></div>
     </div>
     <div class="stat-card">
-      <div class="stat-label">Last 7 Days</div>
+      <div class="stat-label">Last 7 days</div>
       <div class="stat-value"><%= peso(weekTotal.total) %></div>
       <div class="stat-sub"><%= weekTotal.count %> transaction<%= weekTotal.count === 1 ? '' : 's' %></div>
     </div>
     <div class="stat-card">
-      <div class="stat-label">This Month</div>
+      <div class="stat-label">This month</div>
       <div class="stat-value"><%= peso(monthTotal.total) %></div>
       <div class="stat-sub"><%= monthTotal.count %> transaction<%= monthTotal.count === 1 ? '' : 's' %></div>
     </div>
@@ -23,8 +27,14 @@
 
   <div class="grid-2">
     <div class="card">
-      <h2>Sales Trend (7 days)</h2>
-      <canvas id="salesTrendChart" height="220"></canvas>
+      <div class="section-heading">
+        <div>
+          <h2>Sales Trend (7 days)</h2>
+          <p class="data-status" id="salesChartStatus">Loading live data…</p>
+        </div>
+        <button type="button" class="btn btn-small btn-secondary" id="refreshSalesChart">Refresh</button>
+      </div>
+      <div class="chart-wrap"><canvas id="salesTrendChart" height="220"></canvas></div>
     </div>
 
     <div class="card">
@@ -94,17 +104,21 @@
 
 <script src="/js/vendor/chart.umd.min.js"></script>
 <script>
-  const trendData = <%- JSON.stringify(trendData) %>;
   const ctx = document.getElementById('salesTrendChart');
-  new Chart(ctx, {
+  const status = document.getElementById('salesChartStatus');
+  let salesChart;
+
+  function renderSalesChart(data) {
+    if (salesChart) salesChart.destroy();
+    salesChart = new Chart(ctx, {
     type: 'line',
     data: {
-      labels: trendData.map(d => d.day.slice(5)),
+      labels: data.labels.map(day => day.slice(5)),
       datasets: [{
         label: 'Sales (₱)',
-        data: trendData.map(d => d.total),
-        borderColor: '#2b6cb0',
-        backgroundColor: 'rgba(43, 108, 176, 0.15)',
+        data: data.totals,
+        borderColor: '#16805c',
+        backgroundColor: 'rgba(22, 128, 92, 0.15)',
         tension: 0.3,
         fill: true,
       }],
@@ -113,6 +127,25 @@
       plugins: { legend: { display: false } },
       scales: { y: { beginAtZero: true } },
     },
-  });
+    });
+  }
+
+  async function loadSalesChart() {
+    status.textContent = 'Loading live data…';
+    try {
+      const response = await fetch('/admin/api/sales-chart?days=7', {
+        headers: { Accept: 'application/json' },
+      });
+      if (!response.ok) throw new Error(`Request failed (${response.status})`);
+      renderSalesChart(await response.json());
+      status.textContent = `Updated ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+    } catch (error) {
+      status.textContent = 'Unable to load live sales data.';
+      console.error('Could not load sales chart:', error);
+    }
+  }
+
+  document.getElementById('refreshSalesChart').addEventListener('click', loadSalesChart);
+  loadSalesChart();
 </script>
 <%- include('../partials/foot') %>

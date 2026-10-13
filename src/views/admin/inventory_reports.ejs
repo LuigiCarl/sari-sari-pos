@@ -8,7 +8,8 @@
     <% if (reports.length === 0) { %>
       <p class="muted">No inventory reports submitted yet.</p>
     <% } else { %>
-      <table class="table">
+      <button type="button" class="btn btn-small export-button" data-export-table="reportsTable" data-export-name="inventory-reports.csv">Export CSV</button>
+      <table class="table" id="reportsTable">
         <thead><tr><th>Product</th><th>Type</th><th>Change</th><th>Note</th><th>Reported By</th><th>When</th></tr></thead>
         <tbody>
           <% reports.forEach(r => { %>

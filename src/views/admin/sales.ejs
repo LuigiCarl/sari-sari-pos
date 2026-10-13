@@ -9,6 +9,7 @@
       <label>To <input type="date" name="to" value="<%= to %>" /></label>
       <button type="submit" class="btn btn-secondary">Filter</button>
       <a href="/admin/sales" class="btn btn-small">Clear</a>
+      <button type="button" class="btn btn-small" data-export-table="salesTable" data-export-name="sales.csv">Export CSV</button>
     </form>
   </div>
 
@@ -16,7 +17,7 @@
     <% if (sales.length === 0) { %>
       <p class="muted">No transactions found.</p>
     <% } else { %>
-      <table class="table">
+      <table class="table" id="salesTable">
         <thead><tr><th>Receipt</th><th>Cashier</th><th>Total</th><th>Paid</th><th>Change</th><th>When</th></tr></thead>
         <tbody>
           <% sales.forEach(s => { %>

@@ -4,7 +4,7 @@ const { setFlash } = require('../middleware/flash');
 
 async function dashboard(req, res, next) {
   try {
-    const [todayTotal, weekTotal, monthTotal, trend, topProducts, lowStock, recentSales] = await Promise.all([
+    const [todayTotal, weekTotal, monthTotal, topProducts, lowStock, recentSales] = await Promise.all([
       query(
         `SELECT COALESCE(SUM(total_amount), 0) AS total, COUNT(*) AS count
          FROM sales WHERE created_at::date = CURRENT_DATE`
@@ -17,13 +17,6 @@ async function dashboard(req, res, next) {
         `SELECT COALESCE(SUM(total_amount), 0) AS total, COUNT(*) AS count
          FROM sales WHERE to_char(created_at, 'YYYY-MM') = to_char(NOW(), 'YYYY-MM')`
       ).then((r) => r.rows[0]),
-      query(
-        `SELECT to_char(created_at, 'YYYY-MM-DD') AS day, COALESCE(SUM(total_amount), 0) AS total
-         FROM sales
-         WHERE created_at >= NOW() - INTERVAL '6 days'
-         GROUP BY day
-         ORDER BY day`
-      ).then((r) => r.rows),
       query(
         `SELECT sale_items.product_name, SUM(sale_items.quantity) AS units_sold, SUM(sale_items.subtotal) AS revenue
          FROM sale_items
@@ -44,22 +37,11 @@ async function dashboard(req, res, next) {
       ).then((r) => r.rows),
     ]);
 
-    // Fill in missing days with zero so the trend chart has a full 7-day axis.
-    const trendByDay = Object.fromEntries(trend.map((r) => [r.day, r.total]));
-    const trendData = [];
-    for (let i = 6; i >= 0; i--) {
-      const d = new Date();
-      d.setDate(d.getDate() - i);
-      const key = d.toISOString().slice(0, 10);
-      trendData.push({ day: key, total: trendByDay[key] || 0 });
-    }
-
     res.render('admin/dashboard', {
       title: 'Dashboard',
       todayTotal,
       weekTotal,
       monthTotal,
-      trendData,
       topProducts,
       lowStock,
       recentSales,

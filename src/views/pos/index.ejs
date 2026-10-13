@@ -2,8 +2,14 @@
 <%- include('../partials/nav') %>
 <main class="container pos-layout">
   <div class="pos-products">
-    <h1>Point of Sale</h1>
+    <div class="page-heading"><div><h1>Point of Sale</h1><p class="muted">Tap a product to add it to the cart.</p></div><span class="keyboard-hint">⌘ K to search</span></div>
     <input type="search" id="productSearch" placeholder="Search product or scan barcode..." autofocus />
+    <div class="category-filters" id="categoryFilters">
+      <button type="button" class="category-filter active" data-category="all">All products</button>
+      <% [...new Set(products.map(p => p.category_name).filter(Boolean))].forEach(category => { %>
+        <button type="button" class="category-filter" data-category="<%= category %>"><%= category %></button>
+      <% }) %>
+    </div>
     <div class="product-grid" id="productGrid">
       <% products.forEach(p => { %>
         <button
@@ -14,6 +20,7 @@
           data-price="<%= p.selling_price %>"
           data-stock="<%= p.stock_quantity %>"
           data-unit="<%= p.unit %>"
+          data-category="<%= p.category_name || '' %>"
         >
           <span class="product-name"><%= p.name %></span>
           <span class="product-price"><%= peso(p.selling_price) %></span>
@@ -24,7 +31,7 @@
   </div>
 
   <div class="pos-cart">
-    <h2>Cart</h2>
+    <div class="cart-heading"><h2>Cart</h2><span class="cart-count" id="cartCount">0 items</span></div>
     <table class="table" id="cartTable">
       <thead><tr><th>Item</th><th>Price</th><th>Qty</th><th>Subtotal</th><th></th></tr></thead>
       <tbody id="cartBody"></tbody>

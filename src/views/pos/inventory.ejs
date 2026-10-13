@@ -28,14 +28,14 @@
   </div>
 
   <div class="card">
-    <h2>Current Stock</h2>
-    <table class="table">
+    <div class="section-heading"><h2>Current Stock</h2><input type="search" class="table-search" data-filter-table="stockTable" placeholder="Search stock..." /></div>
+    <table class="table" id="stockTable">
       <thead><tr><th>Product</th><th>Stock</th><th>Reorder Level</th></tr></thead>
       <tbody>
         <% products.forEach(p => { %>
-          <tr class="<%= p.stock_quantity <= p.reorder_level ? 'row-warning' : '' %>">
+          <tr class="<%= p.stock_quantity <= p.reorder_level ? 'row-warning' : '' %>" data-search="<%= p.name %>">
             <td><%= p.name %></td>
-            <td><%= p.stock_quantity %> <%= p.unit %></td>
+            <td><span class="stock-badge <%= p.stock_quantity === 0 ? 'stock-out' : (p.stock_quantity <= p.reorder_level ? 'stock-low' : 'stock-good') %>"><%= p.stock_quantity %> <%= p.unit %></span></td>
             <td><%= p.reorder_level %></td>
           </tr>
         <% }) %>

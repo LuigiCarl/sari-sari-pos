@@ -1,6 +1,6 @@
 <header class="topbar">
-  <div class="topbar-brand">🏪 Sari-Sari POS</div>
-  <nav class="topbar-nav">
+  <div class="topbar-brand"><span class="topbar-brand-mark">●</span> Sari-Sari POS</div>
+  <nav class="topbar-nav" aria-label="Main navigation">
     <% if (currentUser && currentUser.role === 'admin') { %>
       <a href="/admin/dashboard">Dashboard</a>
       <a href="/admin/products">Products</a>
@@ -14,12 +14,14 @@
   </nav>
   <div class="topbar-user">
     <% if (currentUser) { %>
-      <span><%= currentUser.fullName %> (<%= currentUser.role === 'admin' ? 'Admin' : 'Sales Rep' %>)</span>
+      <span><%= currentUser.fullName %></span>
+      <span class="user-role"><%= currentUser.role === 'admin' ? 'Admin' : 'Sales Rep' %></span>
       <form method="POST" action="/logout" class="inline-form">
         <button type="submit" class="link-button">Logout</button>
       </form>
     <% } %>
+    <button type="button" class="theme-toggle" data-theme-toggle aria-label="Toggle dark mode">◐</button>
   </div>
 </header>
-<% if (flash && flash.success) { %><div class="alert alert-success"><%= flash.success %></div><% } %>
-<% if (flash && flash.error) { %><div class="alert alert-error"><%= flash.error %></div><% } %>
+<% if (flash && flash.success) { %><div class="alert alert-success" role="status"><%= flash.success %></div><% } %>
+<% if (flash && flash.error) { %><div class="alert alert-error" role="alert"><%= flash.error %></div><% } %>

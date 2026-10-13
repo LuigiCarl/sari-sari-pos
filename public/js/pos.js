@@ -10,6 +10,9 @@
   const checkoutForm = document.getElementById('checkoutForm');
   const productGrid = document.getElementById('productGrid');
   const searchInput = document.getElementById('productSearch');
+  const categoryFilters = document.getElementById('categoryFilters');
+  const cartCount = document.getElementById('cartCount');
+  let activeCategory = 'all';
 
   function peso(n) {
     return '₱' + Number(n).toFixed(2);
@@ -85,6 +88,7 @@
     });
 
     cartTotalEl.textContent = peso(total);
+    cartCount.textContent = `${Array.from(cart.values()).reduce((sum, item) => sum + item.qty, 0)} items`;
     updateChange(total);
     checkoutBtn.disabled = cart.size === 0;
   }
@@ -108,6 +112,16 @@
   productGrid.addEventListener('click', (e) => {
     const tile = e.target.closest('.product-tile');
     if (tile) addToCart(tile);
+  });
+
+  categoryFilters.addEventListener('click', (e) => {
+    const button = e.target.closest('[data-category]');
+    if (!button) return;
+    activeCategory = button.dataset.category;
+    categoryFilters.querySelectorAll('.category-filter').forEach((item) => item.classList.toggle('active', item === button));
+    productGrid.querySelectorAll('.product-tile').forEach((tile) => {
+      tile.hidden = activeCategory !== 'all' && tile.dataset.category !== activeCategory;
+    });
   });
 
   amountPaidInput.addEventListener('input', () => {
@@ -134,14 +148,24 @@
       productGrid.innerHTML = products
         .map(
           (p) => `
-        <button type="button" class="product-tile" data-id="${p.id}" data-name="${escapeAttr(p.name)}" data-price="${p.selling_price}" data-stock="${p.stock_quantity}" data-unit="${escapeAttr(p.unit)}">
+        <button type="button" class="product-tile" data-id="${p.id}" data-name="${escapeAttr(p.name)}" data-price="${p.selling_price}" data-stock="${p.stock_quantity}" data-unit="${escapeAttr(p.unit)}" data-category="${escapeAttr(p.category_name || '')}">
           <span class="product-name">${escapeHtml(p.name)}</span>
           <span class="product-price">${peso(p.selling_price)}</span>
           <span class="product-stock">${p.stock_quantity} ${escapeHtml(p.unit)} left</span>
         </button>`
         )
         .join('');
+      productGrid.querySelectorAll('.product-tile').forEach((tile) => {
+        tile.hidden = activeCategory !== 'all' && tile.dataset.category !== activeCategory;
+      });
     }, 250);
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+      e.preventDefault();
+      searchInput.focus();
+    }
   });
 
   render();

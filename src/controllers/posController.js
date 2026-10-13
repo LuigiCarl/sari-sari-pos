@@ -5,7 +5,9 @@ const { setFlash } = require('../middleware/flash');
 async function posScreen(req, res, next) {
   try {
     const { rows: products } = await query(
-      'SELECT * FROM products WHERE active = TRUE AND stock_quantity > 0 ORDER BY name'
+      `SELECT products.*, categories.name AS category_name
+       FROM products LEFT JOIN categories ON categories.id = products.category_id
+       WHERE products.active = TRUE AND products.stock_quantity > 0 ORDER BY products.name`
     );
     res.render('pos/index', { title: 'Point of Sale', products });
   } catch (err) {
@@ -17,8 +19,11 @@ async function searchProducts(req, res, next) {
   try {
     const q = `%${req.query.q || ''}%`;
     const { rows: products } = await query(
-      `SELECT id, name, barcode, unit, selling_price, stock_quantity
-       FROM products WHERE active = TRUE AND (name ILIKE $1 OR barcode ILIKE $1) ORDER BY name LIMIT 20`,
+      `SELECT products.id, products.name, products.barcode, products.unit, products.selling_price,
+              products.stock_quantity, categories.name AS category_name
+       FROM products LEFT JOIN categories ON categories.id = products.category_id
+       WHERE products.active = TRUE AND (products.name ILIKE $1 OR products.barcode ILIKE $1)
+       ORDER BY products.name LIMIT 20`,
       [q]
     );
     res.json(products);
