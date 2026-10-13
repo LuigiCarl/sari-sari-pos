@@ -1,10 +1,12 @@
 <%- include('../partials/head') %>
 <%- include('../partials/nav') %>
-<main class="container">
-  <h1>Receipt <%= sale.receipt_no %></h1>
+<main class="container sale-detail-page">
+  <h1>Sale Details</h1>
+  <p class="muted sale-receipt-number">Receipt <%= sale.receipt_no %></p>
   <div class="card">
     <p><strong>Cashier:</strong> <%= sale.cashier %></p>
-    <p><strong>Date:</strong> <%= sale.created_at %></p>
+    <p><strong>Date:</strong> <%= new Date(sale.created_at).toLocaleString('en-PH', { timeZone: 'Asia/Manila', month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' }) %></p>
+    <div class="table-scroll" tabindex="0" role="region" aria-label="Sale items">
     <table class="table">
       <thead><tr><th>Product</th><th>Price</th><th>Qty</th><th>Subtotal</th></tr></thead>
       <tbody>
@@ -17,13 +19,14 @@
           </tr>
         <% }) %>
       </tbody>
-      <tfoot>
-        <tr><td colspan="3">Total</td><td><%= peso(sale.total_amount) %></td></tr>
-        <tr><td colspan="3">Amount Paid</td><td><%= peso(sale.amount_paid) %></td></tr>
-        <tr><td colspan="3">Change</td><td><%= peso(sale.change_amount) %></td></tr>
-      </tfoot>
     </table>
-    <a href="/admin/sales" class="btn btn-secondary">Back to Sales</a>
+    </div>
+    <dl class="sale-summary">
+      <div class="sale-summary-total"><dt>Total</dt><dd><%= peso(sale.total_amount) %></dd></div>
+      <div><dt>Amount Paid</dt><dd><%= peso(sale.amount_paid) %></dd></div>
+      <div><dt>Change</dt><dd><%= peso(sale.change_amount) %></dd></div>
+    </dl>
+    <div class="sale-detail-actions"><a href="/admin/sales" class="btn btn-secondary">Back to Sales</a></div>
   </div>
 </main>
 <%- include('../partials/foot') %>

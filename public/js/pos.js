@@ -1,5 +1,9 @@
 (function () {
   const cart = new Map(); // productId -> { id, name, price, qty, stock, unit }
+  // Refresh stock and clear the completed cart when Back restores a cached POS page.
+  window.addEventListener('pageshow', (event) => {
+    if (event.persisted) window.location.reload();
+  });
 
   const cartBody = document.getElementById('cartBody');
   const cartTotalEl = document.getElementById('cartTotal');
@@ -77,13 +81,15 @@
       tr.innerHTML = `
         <td>${escapeHtml(item.name)}</td>
         <td>${peso(item.price)}</td>
-        <td class="qty-controls">
-          <button type="button" data-action="dec" data-id="${item.id}" class="btn btn-small">−</button>
-          ${item.qty}
-          <button type="button" data-action="inc" data-id="${item.id}" class="btn btn-small">+</button>
+        <td>
+          <div class="qty-controls">
+            <button type="button" data-action="dec" data-id="${item.id}" class="btn btn-small" aria-label="Decrease quantity of ${escapeAttr(item.name)}">−</button>
+            <span class="qty-value">${item.qty}</span>
+            <button type="button" data-action="inc" data-id="${item.id}" class="btn btn-small" aria-label="Increase quantity of ${escapeAttr(item.name)}" ${item.qty >= item.stock ? 'disabled' : ''}>+</button>
+          </div>
         </td>
         <td>${peso(subtotal)}</td>
-        <td><button type="button" data-action="remove" data-id="${item.id}" class="btn btn-small btn-danger">✕</button></td>
+        <td><button type="button" data-action="remove" data-id="${item.id}" class="btn btn-small btn-danger" aria-label="Remove ${escapeAttr(item.name)}">✕</button></td>
       `;
       cartBody.appendChild(tr);
     });

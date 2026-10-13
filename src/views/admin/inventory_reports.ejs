@@ -1,29 +1,34 @@
 <%- include('../partials/head') %>
 <%- include('../partials/nav') %>
-<main class="container">
+<main class="container inventory-reports-page">
   <h1>Inventory Reports</h1>
   <p class="muted">Stock adjustments submitted by sales representatives (restocks, damaged/lost items, corrections).</p>
 
   <div class="card">
+    <div class="section-heading reports-toolbar">
+      <div><h2>Stock adjustments <span class="cart-count"><%= reports.length %></span></h2><p class="data-status">Dates shown in Philippine time.</p></div>
+      <% if (reports.length) { %><button type="button" class="btn btn-secondary" data-export-table="reportsTable" data-export-name="inventory-reports.csv">Export CSV</button><% } %>
+    </div>
     <% if (reports.length === 0) { %>
       <p class="muted">No inventory reports submitted yet.</p>
     <% } else { %>
-      <button type="button" class="btn btn-small export-button" data-export-table="reportsTable" data-export-name="inventory-reports.csv">Export CSV</button>
+      <div class="table-scroll" tabindex="0" role="region" aria-label="Inventory adjustments">
       <table class="table" id="reportsTable">
         <thead><tr><th>Product</th><th>Type</th><th>Change</th><th>Note</th><th>Reported By</th><th>When</th></tr></thead>
         <tbody>
           <% reports.forEach(r => { %>
-            <tr class="<%= r.quantity_change < 0 ? 'row-warning' : '' %>">
+            <tr>
               <td><%= r.product_name %></td>
-              <td><%= r.type %></td>
-              <td><%= r.quantity_change > 0 ? '+' : '' %><%= r.quantity_change %></td>
+              <td><span class="stock-badge <%= r.quantity_change < 0 ? 'stock-low' : 'stock-good' %>"><%= r.type.replace(/_/g, ' ') %></span></td>
+              <td class="quantity-change <%= r.quantity_change < 0 ? 'text-danger' : '' %>"><%= r.quantity_change > 0 ? '+' : '' %><%= r.quantity_change %></td>
               <td><%= r.note || '—' %></td>
               <td><%= r.reported_by %></td>
-              <td><%= r.created_at %></td>
+              <td class="report-date"><span><%= new Date(r.created_at).toLocaleDateString('en-PH', { timeZone: 'Asia/Manila', month: 'short', day: 'numeric', year: 'numeric' }) %></span><small class="muted"><%= new Date(r.created_at).toLocaleTimeString('en-PH', { timeZone: 'Asia/Manila', hour: '2-digit', minute: '2-digit' }) %></small></td>
             </tr>
           <% }) %>
         </tbody>
       </table>
+      </div>
     <% } %>
   </div>
 </main>

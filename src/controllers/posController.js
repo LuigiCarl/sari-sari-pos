@@ -101,11 +101,23 @@ async function postCheckout(req, res) {
 
 async function viewReceipt(req, res, next) {
   try {
-    const { rows } = await query('SELECT * FROM sales WHERE id = $1', [req.params.id]);
+    const { rows } = await query('SELECT * FROM sales WHERE id = $1 AND user_id = $2', [req.params.id, req.session.user.id]);
     const sale = rows[0];
     if (!sale) return res.status(404).render('error', { title: 'Not Found', message: 'Receipt not found.' });
     const { rows: items } = await query('SELECT * FROM sale_items WHERE sale_id = $1', [sale.id]);
     res.render('pos/receipt', { title: 'Receipt', sale, items });
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function mySales(req, res, next) {
+  try {
+    const { rows: sales } = await query(
+      'SELECT id, receipt_no, total_amount, created_at FROM sales WHERE user_id = $1 ORDER BY created_at DESC LIMIT 100',
+      [req.session.user.id]
+    );
+    res.render('pos/sales', { title: 'My Sales', sales });
   } catch (err) {
     next(err);
   }
@@ -178,6 +190,7 @@ module.exports = {
   searchProducts,
   postCheckout,
   viewReceipt,
+  mySales,
   inventoryScreen,
   postInventoryReport,
 };

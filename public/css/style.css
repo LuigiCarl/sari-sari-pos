@@ -573,6 +573,65 @@ input::placeholder { color: var(--muted); opacity: 0.8; }
 }
 
 /* Application shell and catalog */
+.sale-receipt-number { margin: -0.5rem 0 1.5rem; overflow-wrap: anywhere; }
+.sale-detail-page .table { min-width: 420px; }
+.sale-detail-page .table th:not(:first-child), .sale-detail-page .table td:not(:first-child) { text-align: right; }
+.sale-summary { width: min(100%, 360px); margin: 1.5rem 0 0 auto; }
+.sale-summary > div { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; padding: 0.8rem 0; border-bottom: 1px solid var(--border); }
+.sale-summary dd { margin: 0; font-weight: 650; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.sale-summary-total { font-size: 1.2rem; font-weight: 750; }
+.sale-summary-total dd { color: var(--primary); }
+.sale-detail-actions { margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid var(--border); }
+.receipt-brand { text-align: center; margin-bottom: 1.5rem; }
+.receipt-brand > strong { font-size: 1.25rem; }
+.receipt-brand h1 { font-size: 1rem; margin: 0.4rem 0 0; color: var(--muted); }
+.receipt .table { min-width: 0; table-layout: fixed; }
+.receipt .table th:first-child { width: 42%; }
+.receipt .table th:nth-child(2) { width: 21%; }
+.receipt .table th:nth-child(3) { width: 10%; }
+.receipt .table th:nth-child(4) { width: 27%; }
+.receipt .table td { overflow-wrap: anywhere; }
+.receipt .table th:not(:first-child), .receipt .table td:not(:first-child) { text-align: right; }
+.receipt-grand-total { font-weight: 750; }
+.receipt-thanks { text-align: center; font-size: 0.85rem; margin: 1.5rem 0 0; }
+.receipt-actions { flex-wrap: wrap; }
+.pos-cart .table th, .pos-cart .table td { overflow: visible; vertical-align: middle; padding: 0.85rem 0.2rem; }
+.pos-cart .table th:nth-child(1), .pos-cart .table td:nth-child(1) { width: 29%; overflow-wrap: anywhere; }
+.pos-cart .table th:nth-child(2), .pos-cart .table td:nth-child(2) { width: 18%; white-space: nowrap; }
+.pos-cart .table th:nth-child(3), .pos-cart .table td:nth-child(3) { width: 25%; }
+.pos-cart .table th:nth-child(4), .pos-cart .table td:nth-child(4) { width: 20%; white-space: nowrap; }
+.pos-cart .table th:nth-child(5), .pos-cart .table td:nth-child(5) { width: 8%; text-align: right; }
+.pos-cart .qty-controls { display: inline-flex; align-items: center; justify-content: center; gap: 0; background: var(--surface-soft); border: 1px solid var(--border); border-radius: 8px; }
+.pos-cart .qty-controls .btn { padding: 0; width: 24px; min-width: 24px; height: 32px; min-height: 32px; background: transparent; color: var(--primary); border-radius: 6px; box-shadow: none; transform: none; }
+.qty-value { min-width: 20px; padding: 0 2px; text-align: center; font-variant-numeric: tabular-nums; font-size: 0.78rem; }
+.pos-cart [data-action="remove"] { width: 26px; min-height: 30px; padding: 0; }
+@media (max-width: 400px) {
+  .pos-cart .table th:nth-child(2), .pos-cart .table td:nth-child(2) { display: none; }
+  .pos-cart .table th:nth-child(1), .pos-cart .table td:nth-child(1) { width: 34%; }
+  .pos-cart .table th:nth-child(3), .pos-cart .table td:nth-child(3) { width: 30%; }
+  .pos-cart .table th:nth-child(4), .pos-cart .table td:nth-child(4) { width: 27%; }
+  .pos-cart .table th:nth-child(5), .pos-cart .table td:nth-child(5) { width: 9%; }
+}
+.dashboard-page { padding-top: 1.75rem; }
+.dashboard-page .dashboard-heading { justify-content: space-between; gap: 1rem; margin-bottom: 1.5rem; }
+.dashboard-page .dashboard-copy h1 { font-size: clamp(28px, 3vw, 32px); margin: 0 0 0.4rem; }
+.chart-range { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0 0 1rem; }
+.card-link { white-space: nowrap; font-size: 0.82rem; font-weight: 600; text-decoration: none; }
+.card-link:hover { text-decoration: underline; }
+@media (max-width: 500px) {
+  .dashboard-page .dashboard-heading { align-items: flex-start; flex-direction: column; }
+}
+.reports-toolbar { align-items: center; }
+.reports-toolbar h2 { display: flex; align-items: center; gap: 0.6rem; }
+.inventory-reports-page > .muted { margin-bottom: 1.5rem; }
+#reportsTable { min-width: 760px; }
+#reportsTable th:first-child { width: 23%; }
+#reportsTable th:last-child { width: 17%; }
+#reportsTable td { overflow-wrap: anywhere; }
+#reportsTable .stock-badge { text-transform: capitalize; }
+.quantity-change { font-weight: 700; color: var(--primary); white-space: nowrap; }
+.report-date span, .report-date small { display: block; white-space: nowrap; }
+.report-date small { margin-top: 0.25rem; font-size: 0.75rem; }
 body:has(.topbar) { padding-left: 236px; }
 .topbar { position: fixed; inset: 0 auto 0 0; width: 236px; height: 100dvh; display: flex; flex-direction: column; align-items: stretch; flex-wrap: nowrap; padding: 1.5rem 1rem; border-right: 1px solid var(--border); border-bottom: 0; gap: 2rem; z-index: 30; }
 .topbar-brand { padding: 0 0.4rem; }
@@ -637,4 +696,24 @@ body:has(dialog[open]) { overflow: hidden; }
 }
 @media print {
   body:has(.topbar) { padding-left: 0; }
+}
+
+/* Print rules follow all screen rules to prevent the mobile header reappearing. */
+@media print {
+  @page { margin: 12mm; }
+  html, body { background: #fff !important; color: #000 !important; }
+  body:has(.topbar) { padding: 0 !important; }
+  .topbar, .app-footer, .receipt-actions, .alert, .toast-region, dialog { display: none !important; }
+  .receipt-page { margin: 0 auto; padding: 0; max-width: 100%; }
+  .receipt { width: 100%; max-width: 80mm; margin: 0 auto; padding: 0; border: 0; border-radius: 0; box-shadow: none; background: #fff; color: #000; overflow: visible; font-size: 10pt; }
+  .receipt-brand { margin-bottom: 5mm; }
+  .receipt-brand h1, .receipt .muted { color: #000; }
+  .receipt > p { margin: 2mm 0; overflow-wrap: anywhere; }
+  .receipt .table { width: 100%; min-width: 0; font-size: 9pt; margin-top: 4mm; }
+  .receipt .table th, .receipt .table td { padding: 2.5mm 1mm; color: #000; background: transparent; border-bottom: 1px dashed #aaa; }
+  .receipt .table th { font-size: 8pt; letter-spacing: 0; }
+  .receipt .table tr { break-inside: avoid; }
+  .receipt .table tfoot { display: table-row-group; }
+  .receipt .receipt-grand-total td { border-top: 1px solid #000; font-size: 10pt; }
+  .receipt .receipt-thanks { margin-top: 5mm; }
 }

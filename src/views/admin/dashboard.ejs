@@ -3,19 +3,12 @@
 <main class="container dashboard-page">
   <div class="dashboard-heading">
     <div class="dashboard-title">
-      <div class="dashboard-logo-wrap">
-        <img src="/images/logo.png" alt="" class="dashboard-logo" />
-      </div>
       <div class="dashboard-copy">
-        <p class="eyebrow">Store overview</p>
         <h1>Dashboard</h1>
         <p class="muted">Here’s how your store is doing today.</p>
       </div>
     </div>
-  </div>
-  <div class="quick-actions">
-    <a href="/admin/products#add" class="btn btn-primary">+ Add product</a>
-    <a href="/admin/sales" class="btn btn-secondary">View sales</a>
+    <a href="/admin/sales" class="btn btn-primary">View sales</a>
   </div>
 
   <div class="stat-row">
@@ -40,10 +33,15 @@
     <div class="card">
       <div class="section-heading">
         <div>
-          <h2>Sales Trend (7 days)</h2>
+          <h2>Sales Trend <span class="muted" id="salesRangeLabel">(Last 7 days)</span></h2>
           <p class="data-status" id="salesChartStatus">Loading live data…</p>
         </div>
         <button type="button" class="btn btn-small btn-secondary" id="refreshSalesChart">Refresh</button>
+      </div>
+      <div class="chart-range" role="group" aria-label="Sales chart date range">
+        <button type="button" class="category-filter" data-sales-range="today" aria-pressed="false">Today</button>
+        <button type="button" class="category-filter active" data-sales-range="week" aria-pressed="true">Last 7 days</button>
+        <button type="button" class="category-filter" data-sales-range="month" aria-pressed="false">This month</button>
       </div>
       <div class="chart-wrap"><canvas id="salesTrendChart" aria-label="Sales for the last seven days" role="img"></canvas></div>
     </div>
@@ -71,13 +69,12 @@
 
   <div class="grid-2 dashboard-grid dashboard-activity">
     <div class="card">
-      <h2>Low Stock Alerts</h2>
+      <div class="section-heading"><h2>Low Stock Alerts</h2><a href="/admin/products" class="card-link">Manage stock</a></div>
       <% if (lowStock.length === 0) { %>
         <div class="dashboard-empty">
           <span class="empty-check" aria-hidden="true">&#10003;</span>
           <strong>Stock levels look good</strong>
           <p class="muted">All products are sufficiently stocked.</p>
-          <a href="/admin/products" class="btn btn-secondary">Manage products</a>
         </div>
       <% } else { %>
         <table class="table">
@@ -96,7 +93,7 @@
     </div>
 
     <div class="card">
-      <h2>Recent Transactions</h2>
+      <div class="section-heading"><h2>Recent Transactions</h2><a href="/admin/sales" class="card-link">View all</a></div>
       <% if (recentSales.length === 0) { %>
         <p class="muted">No transactions yet.</p>
       <% } else { %>
@@ -126,6 +123,8 @@
   const ctx = document.getElementById('salesTrendChart');
   const status = document.getElementById('salesChartStatus');
   let salesChart;
+  let selectedRange = 'week';
+  let chartRequest;
 
   function renderSalesChart(data) {
     if (salesChart) salesChart.destroy();
@@ -152,21 +151,37 @@
   }
 
   async function loadSalesChart() {
+    if (chartRequest) chartRequest.abort();
+    chartRequest = new AbortController();
+    const signal = chartRequest.signal;
     status.textContent = 'Loading live data…';
     try {
-      const response = await fetch('/admin/api/sales-chart?days=7', {
+      const response = await fetch(`/admin/api/sales-chart?range=${selectedRange}`, {
+        signal,
         headers: { Accept: 'application/json' },
       });
       if (!response.ok) throw new Error(`Request failed (${response.status})`);
       renderSalesChart(await response.json());
       status.textContent = `Updated ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
     } catch (error) {
+      if (error.name === 'AbortError') return;
       status.textContent = 'Unable to load live sales data.';
       console.error('Could not load sales chart:', error);
     }
   }
 
   document.getElementById('refreshSalesChart').addEventListener('click', loadSalesChart);
+  document.querySelectorAll('[data-sales-range]').forEach(button => button.addEventListener('click', () => {
+    selectedRange = button.dataset.salesRange;
+    document.querySelectorAll('[data-sales-range]').forEach(item => {
+      item.classList.toggle('active', item === button);
+      item.setAttribute('aria-pressed', String(item === button));
+    });
+    const label = button.textContent;
+    document.getElementById('salesRangeLabel').textContent = `(${label})`;
+    ctx.setAttribute('aria-label', `Sales: ${label}`);
+    loadSalesChart();
+  }));
   loadSalesChart();
 </script>
 <%- include('../partials/foot') %>

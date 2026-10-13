@@ -243,24 +243,26 @@ async function listInventoryReports(req, res, next) {
 
 async function salesChartData(req, res, next) {
   try {
-    const days = Math.min(Number(req.query.days) || 7, 90);
+    const days = Math.max(1, Math.min(Math.floor(Number(req.query.days)) || 7, 90));
+    const range = req.query.range;
     const { rows } = await query(
-      `SELECT to_char(created_at, 'YYYY-MM-DD') AS day, COALESCE(SUM(total_amount), 0) AS total
-       FROM sales
-       WHERE created_at >= NOW() - ($1::text || ' days')::interval
-       GROUP BY day ORDER BY day`,
-      [String(days - 1)]
+      `WITH bounds AS (
+         SELECT (NOW() AT TIME ZONE 'Asia/Manila')::date AS today,
+           CASE WHEN $1 = 'today' THEN (NOW() AT TIME ZONE 'Asia/Manila')::date
+                WHEN $1 = 'month' THEN date_trunc('month', NOW() AT TIME ZONE 'Asia/Manila')::date
+                ELSE (NOW() AT TIME ZONE 'Asia/Manila')::date - ($2::integer - 1) END AS start_day
+       ), dates AS (
+         SELECT generate_series(start_day::timestamp, today::timestamp, INTERVAL '1 day') AS day FROM bounds
+       )
+       SELECT to_char(dates.day, 'YYYY-MM-DD') AS day, COALESCE(SUM(sales.total_amount), 0) AS total
+       FROM dates LEFT JOIN sales
+         ON sales.created_at >= dates.day AT TIME ZONE 'Asia/Manila'
+        AND sales.created_at < (dates.day + INTERVAL '1 day') AT TIME ZONE 'Asia/Manila'
+       GROUP BY dates.day ORDER BY dates.day`,
+      [range || 'week', range === 'week' ? 7 : days]
     );
-    const byDay = Object.fromEntries(rows.map((r) => [r.day, r.total]));
-    const labels = [];
-    const totals = [];
-    for (let i = days - 1; i >= 0; i--) {
-      const d = new Date();
-      d.setDate(d.getDate() - i);
-      const key = d.toISOString().slice(0, 10);
-      labels.push(key);
-      totals.push(byDay[key] || 0);
-    }
+    const labels = rows.map(r => r.day);
+    const totals = rows.map(r => Number(r.total));
     res.json({ labels, totals });
   } catch (err) {
     next(err);
