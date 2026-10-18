@@ -207,14 +207,16 @@ async function submitReport(productId, type, quantityChange, note, userId) {
 
 async function postInventoryReport(req, res) {
   const { product_id, type, quantity, note } = req.body;
+  const productId = Number(product_id);
   const qty = Number(quantity);
   try {
+    if (!Number.isSafeInteger(productId) || productId <= 0) throw new Error('Select a valid product.');
     if (!Number.isInteger(qty) || qty <= 0) throw new Error('Enter a positive whole-number quantity.');
     if (!['restock', 'damaged', 'lost', 'correction'].includes(type)) throw new Error('Select a valid report type.');
     if (type === 'correction' && !String(note || '').trim()) throw new Error('A reason is required for stock corrections.');
     if (type === 'correction' && !['increase', 'decrease'].includes(req.body.direction)) throw new Error('Select the correction direction.');
     const signedQty = type === 'restock' || (type === 'correction' && req.body.direction === 'increase') ? qty : -qty;
-    await submitReport(Number(product_id), type, signedQty, note, req.session.user.id);
+    await submitReport(productId, type, signedQty, note, req.session.user.id);
     setFlash(req, 'success', 'Inventory report submitted.');
   } catch (err) {
     setFlash(req, 'error', err.message);
@@ -229,5 +231,6 @@ module.exports = {
   viewReceipt,
   mySales,
   inventoryScreen,
+  submitReport,
   postInventoryReport,
 };
