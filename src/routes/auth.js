@@ -1,8 +1,10 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const { query } = require('../config/db');
-const { redirectIfAuthed } = require('../middleware/auth');
+const { requireAuth, redirectIfAuthed } = require('../middleware/auth');
 const { setFlash } = require('../middleware/flash');
+const { ensureCsrfToken, verifyCsrfToken } = require('../middleware/csrf');
+const profile = require('../controllers/profileController');
 
 const router = express.Router();
 
@@ -96,5 +98,9 @@ router.post('/logout', (req, res) => {
   req.session = null;
   res.redirect('/login');
 });
+
+router.get('/profile', requireAuth, ensureCsrfToken, profile.showProfile);
+router.post('/profile', requireAuth, ensureCsrfToken, verifyCsrfToken, profile.updateProfile);
+router.post('/profile/password', requireAuth, ensureCsrfToken, verifyCsrfToken, profile.changePassword);
 
 module.exports = router;
