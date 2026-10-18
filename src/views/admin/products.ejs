@@ -23,6 +23,7 @@
 <dialog class="drawer" id="productDrawer" aria-labelledby="productDrawerTitle">
   <div class="drawer-heading"><div><p class="eyebrow">Store catalog</p><h2 id="productDrawerTitle">Add Product</h2></div><button type="button" class="btn btn-secondary" data-close-dialog aria-label="Close product form">&#10005;</button></div>
   <form method="POST" action="/admin/products" id="productEditor" class="form-grid">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
     <label class="form-wide">Product name<input name="name" required /></label>
     <label>Barcode<input name="barcode" /></label><label>Category<select name="category_id"><option value="">Uncategorized</option><% categories.forEach(c => { %><option value="<%= c.id %>"><%= c.name %></option><% }) %></select></label>
     <label>Unit<input name="unit" value="pc" required /></label><label>Selling price<input type="number" step="0.01" name="selling_price" required /></label>
@@ -34,7 +35,7 @@
 </dialog>
 <dialog class="drawer" id="categoryDrawer" aria-labelledby="categoryDrawerTitle">
   <div class="drawer-heading"><h2 id="categoryDrawerTitle">Categories</h2><button type="button" class="btn btn-secondary" data-close-dialog aria-label="Close categories">&#10005;</button></div>
-  <form method="POST" action="/admin/categories" class="form-inline"><input name="name" placeholder="New category name" aria-label="New category name" required /><button type="submit" class="btn btn-primary">Add</button></form>
+  <form method="POST" action="/admin/categories" class="form-inline"><input type="hidden" name="_csrf" value="<%= csrfToken %>" /><input name="name" placeholder="New category name" aria-label="New category name" required /><button type="submit" class="btn btn-primary">Add</button></form>
   <h2 class="category-list-title">Existing categories</h2><ul class="plain-list"><% categories.forEach(c => { %><li><%= c.name %></li><% }) %></ul>
 </dialog>
 <script src="/js/products.js"></script>

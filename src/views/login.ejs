@@ -1,6 +1,7 @@
 <%- include('partials/head') %>
 <div class="login-page">
   <form method="POST" action="/login" class="login-card">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
     <div class="auth-brand">
       <img src="/images/logo.png" alt="Sari-Sari POS logo" class="auth-logo" />
       <span class="auth-brand-name">Sari-Sari <strong>POS</strong></span>

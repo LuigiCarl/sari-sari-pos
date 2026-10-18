@@ -6,6 +6,7 @@ const express = require('express');
 const cookieSession = require('cookie-session');
 
 const { requireAuth } = require('./middleware/auth');
+const { ensureCsrfToken, verifyCsrfToken } = require('./middleware/csrf');
 const flash = require('./middleware/flash');
 const authRoutes = require('./routes/auth');
 const adminRoutes = require('./routes/admin');
@@ -33,6 +34,11 @@ app.use(
 );
 
 app.use(flash);
+app.use(ensureCsrfToken);
+app.use((req, res, next) => {
+  if (req.method !== 'POST') return next();
+  return verifyCsrfToken(req, res, next);
+});
 app.locals.peso = helpers.peso;
 
 app.get('/', (req, res) => {
