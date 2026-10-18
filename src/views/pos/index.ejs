@@ -42,6 +42,7 @@
     <div class="cart-total">Total: <span id="cartTotal">₱0.00</span></div>
 
     <form method="POST" action="/pos/checkout" id="checkoutForm" data-user-id="<%= currentUser.id %>">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
       <input type="hidden" name="items" id="itemsInput" />
       <input type="hidden" name="checkout_token" value="<%= checkoutToken %>" />
       <p class="data-status" id="cartRecoveryStatus" role="status"></p>

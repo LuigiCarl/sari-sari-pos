@@ -6,6 +6,7 @@
   <div class="card">
     <h2>Add User</h2>
     <form method="POST" action="/admin/users" class="form-grid">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
       <label>Username <input type="text" name="username" required /></label>
       <label>Full Name <input type="text" name="full_name" required /></label>
       <label>Password <input type="password" name="password" required minlength="6" /></label>
@@ -33,6 +34,7 @@
             <td><%= u.created_at %></td>
             <td>
               <form method="POST" action="/admin/users/<%= u.id %>/toggle-active" class="inline-form">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
                 <button type="submit" class="btn btn-small"><%= u.active ? 'Deactivate' : 'Activate' %></button>
               </form>
             </td>

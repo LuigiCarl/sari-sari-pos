@@ -6,6 +6,7 @@
   <div class="card">
     <h2>Submit Inventory Report</h2>
     <form method="POST" action="/pos/inventory/report" class="form-grid">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
       <label>Product
         <select name="product_id" required>
           <% products.forEach(p => { %>
