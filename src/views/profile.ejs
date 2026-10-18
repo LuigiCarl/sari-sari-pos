@@ -1,0 +1,54 @@
+<%- include('partials/head') %>
+<%- include('partials/nav') %>
+<main class="container profile-page">
+  <div class="profile-heading">
+    <div>
+      <p class="eyebrow">Account settings</p>
+      <h1>My Profile</h1>
+      <p class="muted">Manage your personal information and account password.</p>
+    </div>
+    <div class="profile-summary" aria-label="Account summary">
+      <span class="profile-avatar" aria-hidden="true"><%= profile.full_name.charAt(0).toUpperCase() %></span>
+      <div><strong><%= profile.full_name %></strong><span><%= profile.role === 'admin' ? 'Administrator' : 'Sales Representative' %></span></div>
+    </div>
+  </div>
+
+  <div class="grid-2 profile-grid">
+    <section class="card" aria-labelledby="personalInfoHeading">
+      <h2 id="personalInfoHeading">Personal information</h2>
+      <p class="muted form-intro">Update the name and username shown on your account.</p>
+      <form method="POST" action="/profile" class="form-grid profile-form">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+        <label class="form-wide">Full Name
+          <input type="text" name="full_name" value="<%= profile.full_name %>" required minlength="2" maxlength="100" autocomplete="name" />
+        </label>
+        <label class="form-wide">Username
+          <input type="text" name="username" value="<%= profile.username %>" required minlength="3" maxlength="50" pattern="[A-Za-z0-9._-]+" autocomplete="username" aria-describedby="usernameHint" />
+          <small id="usernameHint" class="field-hint">Letters, numbers, dots, underscores, and hyphens only.</small>
+        </label>
+        <div class="form-wide profile-meta">Member since <time datetime="<%= new Date(profile.created_at).toISOString() %>"><%= new Date(profile.created_at).toLocaleDateString('en-PH', { year: 'numeric', month: 'long', day: 'numeric' }) %></time></div>
+        <div class="form-wide"><button type="submit" class="btn btn-primary">Save changes</button></div>
+      </form>
+    </section>
+
+    <section class="card" aria-labelledby="passwordHeading">
+      <h2 id="passwordHeading">Change password</h2>
+      <p class="muted form-intro">You will be asked to sign in again after changing your password.</p>
+      <form method="POST" action="/profile/password" class="form-grid profile-form">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+        <label class="form-wide">Current Password
+          <input type="password" name="current_password" required autocomplete="current-password" />
+        </label>
+        <label class="form-wide">New Password
+          <input type="password" name="new_password" required minlength="8" maxlength="128" autocomplete="new-password" aria-describedby="passwordHint" />
+          <small id="passwordHint" class="field-hint">Use at least 8 characters.</small>
+        </label>
+        <label class="form-wide">Confirm New Password
+          <input type="password" name="confirm_password" required minlength="8" maxlength="128" autocomplete="new-password" />
+        </label>
+        <div class="form-wide"><button type="submit" class="btn btn-primary">Update password</button></div>
+      </form>
+    </section>
+  </div>
+</main>
+<%- include('partials/foot') %>
